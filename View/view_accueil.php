@@ -16,41 +16,48 @@ class AccueilView{
 
     //METHOD
     public function renderAccueil(){
-        //Exemple d'affichage dynamique selon qu'un utilisateur est connecté ou non
-        //Je vérifier la $_SESSION
-        //Si elle n'existe pas, alors l'utilisateur n'est pas connecté et j'affiche avec du HTML avec un echo
         if(!isset($_SESSION['role'])){
             $accueil = "
-                <h2>Inscription Utilisateur</h2>
-                <form action='' method='post'>
-                    <label for='nickname'>Pseudo</label><input type='text' id='nickname' name='nickname'>
-                    <label for='email'>Email</label><input type='text' id='email' name='email'>
-                    <label for='password'>Mot de Passe</label><input type='text' id='password' name='password'>
-                    <label for='passwordVerify'>Retappez le Mot de Passe</label><input type='text' id='passwordVerify' name='passwordVerify'>
-                    <input type='submit' name='signIn' value=\"S'inscrire\">
-                </form>
-                    
-                <p>".$this->getMessage()."</p>
+                <div class='auth-container'>
+                    <section class='auth-card'>
+                        <h2>Inscription Utilisateur</h2>
+                        <form action='' method='post'>
+                            <label for='nickname'>Pseudo</label><input type='text' id='nickname' name='nickname'>
+                            <label for='email'>Email</label><input type='email' id='email' name='email'>
+                            <label for='password'>Mot de Passe</label><input type='password' id='password' name='password'>
+                            <label for='passwordVerify'>Retappez le Mot de Passe</label><input type='password' id='passwordVerify' name='passwordVerify'>
+                            <input type='submit' name='signIn' value=\"S'inscrire\">
+                        </form>
+                        <p>".htmlspecialchars($this->getMessage())."</p>
+                    </section>
 
-                <h2>Connexion Utilisateur</h2>
-                <form action='' method='post'>
-                    <label for='nicknameSignUp'>Pseudo</label><input type='text' id='nicknameSignUp' name='nicknameSignUp'>
-                    <label for='passwordSignUp'>Password</label><input type='text' id='passwordSignUp' name='passwordSignUp'>
-                    <input type='submit' name='signUp' value='Se Connecter'>
-                </form>
-                <p>".$this->getMessageCo()."</p>";
+                    <section class='auth-card'>
+                        <h2>Connexion Utilisateur</h2>
+                        <form action='' method='post'>
+                            <label for='nicknameSignUp'>Pseudo</label><input type='text' id='nicknameSignUp' name='nicknameSignUp'>
+                            <label for='passwordSignUp'>Password</label><input type='password' id='passwordSignUp' name='passwordSignUp'>
+                            <input type='submit' name='signUp' value='Se Connecter'>
+                        </form>
+                        <p>".htmlspecialchars($this->getMessageCo())."</p>
+                    </section>
+                </div>";
 
-        }else{ //Sinon, l'utilisateur est connecté, et j'affiche un autre HTML avec un echo
+        }else{ 
             $accueil =  "
-                <h2>Bienvenue {$_SESSION['nickname']}</h2>
-                <p>Pseudo : {$_SESSION['nickname']} </p>
-                <p>Email : {$_SESSION['email']} </p>
-                <p>Role : {$_SESSION['role']} </p>
+                <div class='auth-container'>
+                    <section class='auth-card' style='max-width: 500px;'>
+                        <h2>Bienvenue " . htmlspecialchars($_SESSION['nickname']) . "</h2>
+                        <div style='background:#FAFAFA; padding:15px; border-radius:8px; border-left: 5px solid var(--primary);'>
+                            <p><strong>Pseudo :</strong> " . htmlspecialchars($_SESSION['nickname']) . " </p>
+                            <p><strong>Email :</strong> " . htmlspecialchars($_SESSION['email']) . " </p>
+                            <p><strong>Rôle :</strong> " . htmlspecialchars($_SESSION['role']) . " </p>
+                        </div>
+                    </section>
+                </div>
             ";
         }
 
         return "<h1>Bienvenue sur le Projet Task</h1>".$accueil;
     }
 }
-
 ?>

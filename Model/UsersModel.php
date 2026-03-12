@@ -47,90 +47,113 @@ class Users {
     public function setIdRole(?int $id_role): self { $this->id_role = $id_role; return $this; }
 
     //METHOD
-    //Mes méthodes n'ont plus besoin de paramètre. En effet, elles vont chercher les données nécessaires directement au sein de l'objet avec les Getter
+    
     public function readUserByNickname():array{
         try{
-                //Préparer la requête à envoyer
-                // ici $this->getBDD() me permet de récupérer l'objet de connexion PDO conserver dans l'objet user
-                $req = $this->getBDD()->prepare('SELECT u.id_user, u.nickname_user, u.email_user, u.firstname_user, u.lastname_user, u.password_user, r.id_role, r.`role` FROM users u INNER JOIN `role` r ON u.id_role = r.id_role WHERE u.nickname_user = ? LIMIT 1');
+            //Préparer la requête à envoyer
+            // ici $this->getBDD() me permet de récupérer l'objet de connexion PDO conserver dans l'objet user
+            $req = $this->getBDD()->prepare('SELECT u.id_user, u.nickname_user, u.email_user, u.firstname_user, u.lastname_user, u.password_user, r.id_role, r.`role` FROM users u INNER JOIN `role` r ON u.id_role = r.id_role WHERE u.nickname_user = ? LIMIT 1');
 
-                //Je récupère le pseudo de l'utilisateur avec $this->getNickname()
-                $nickname = $this->getNickname();
+            //Je récupère le pseudo de l'utilisateur avec $this->getNickname()
+            $nickname = $this->getNickname();
 
-                //Binding de Paramètre
-                $req->bindParam(1,$nickname,PDO::PARAM_STR);
+            //Binding de Paramètre
+            $req->bindParam(1,$nickname,PDO::PARAM_STR);
 
-                //Exécuter la requête
-                $req->execute();
+            //Exécuter la requête
+            $req->execute();
 
-                //Récupérer la réponse de la BDD
-                $data = $req->fetch();
+            //Récupérer la réponse de la BDD
+            $data = $req->fetch(PDO::FETCH_ASSOC);
 
-                return $data;
-            }catch(EXCEPTION $error){
-                die($error->getMessage());
-            }
+            return $data ? $data : [];
+        }catch(Exception $error) {
+             // 1. On fabrique message avec la date, l'heure et l'endroit du bug
+            $date = date('Y-m-d H:i:s');
+            $logMessage = "[{$date}] Erreur SQL dans UserModel->readUserByNickname() : " . $error->getMessage() . PHP_EOL;
+
+            // 2. On écrit dans le fichier log caché sur le serveur
+            // __DIR__ représente le dossier actuel (Model). Le /../ permet de remonter d'un cran pour aller dans logs/
+            error_log($logMessage, 3, __DIR__ . '/../logs/errors.log');
+
+            // 3. On retourne un tableau vide au lieu de faire crasher la page
+            return [];
+        }
     }
     
     public function readUserByNicknameAndEmail():array{
         try{
-                        //Prepare
-                        $req = $this->getBDD()->prepare('SELECT u.id_user, u.nickname_user, u.email_user, u.firstname_user, u.lastname_user, u.password_user, r.id_role, r.`role` FROM users u INNER JOIN `role` r ON u.id_role = r.id_role WHERE u.nickname_user = ? OR u.email_user = ?');
+            //Prepare
+            $req = $this->getBDD()->prepare('SELECT u.id_user, u.nickname_user, u.email_user, u.firstname_user, u.lastname_user, u.password_user.id_role, r.`role` FROM users u INNER JOIN `role` r ON u.id_role = r.id_role WHERE u.nickname_user = ? OR u.email_user = ?');
 
-                        $nickname = $this->getNickname();
-                        $email = $this->getEmail();
-                        //BindParam
-                        $req->bindParam(1,$nickname,PDO::PARAM_STR);
-                        $req->bindParam(2,$email,PDO::PARAM_STR);
+            $nickname = $this->getNickname();
+            $email = $this->getEmail();
+            //BindParam
+            $req->bindParam(1,$nickname,PDO::PARAM_STR);
+            $req->bindParam(2,$email,PDO::PARAM_STR);
 
-                        //Execute
-                        $req->execute();
+            //Execute
+            $req->execute();
 
-                        //$data = FetchAll
-                        $data = $req->fetchAll();
+            //$data = FetchAll
+            $data = $req->fetchAll();
 
-                        //[TEST] : Ici j'affiche la réponse de la BDD pour TESTER si ma requête fonctionne comme voulu
-                        echo "Print_r(\$data) pour savoir ce qu'il y a dedans </br>";
-                        print_r($data);
+            return $data;
 
-                        return $data;
+        }catch(Exception $error) {
+             // 1. On fabrique message avec la date, l'heure et l'endroit du bug
+            $date = date('Y-m-d H:i:s');
+            $logMessage = "[{$date}] Erreur SQL dans UserModel->readUserByNicknameAndEmail() : " . $error->getMessage() . PHP_EOL;
 
-                    }catch(EXCEPTION $error){
-                        die($error-getMessage());
-                    }
+            // 2. On écrit dans le fichier log caché sur le serveur
+            // __DIR__ représente le dossier actuel (Model). Le /../ permet de remonter d'un cran pour aller dans logs/
+            error_log($logMessage, 3, __DIR__ . '/../logs/errors.log');
+
+            // 3. On retourne un tableau vide au lieu de faire crasher la page
+            return [];
+        }
     }
 
     public function createUser():array{
         try{
-                            //ETAPE 6.2 : Vérifier si le Pseudo et l'Email sont disponible. Former la requête à envoyer
-                            $req = $this->getBDD()->prepare("INSERT INTO users (nickname_user, email_user, password_user, id_role) VALUES (?,?,?, 2)");
+            //ETAPE 6.2 : Vérifier si le Pseudo et l'Email sont disponible. Former la requête à envoyer
+            $req = $this->getBDD()->prepare("INSERT INTO users (nickname_user, email_user, password_user, id_role) VALUES (?,?,?, 2)");
 
-                            $nickname = $this->getNickname();
-                            $email = $this->getEmail();
-                            $password = $this->getPassword();
+            $nickname = $this->getNickname();
+            $email = $this->getEmail();
+            $password = $this->getPassword();
 
-                            //ETAPE 6.3 : Binding de Paramètre -> relier chaque ? de la requête à une valeur
-                            //1er paramètre : position du ? dans la requête
-                            //2nd paramètre : valeur à insérer dans la requête
-                            //3eme paramètre : format du paramètre (classiquement : STRING ou INT)
-                            $req->bindParam(1,$nickname,PDO::PARAM_STR);
-                            $req->bindParam(2,$email,PDO::PARAM_STR);
-                            $req->bindParam(3,$password,PDO::PARAM_STR);
+            //ETAPE 6.3 : Binding de Paramètre -> relier chaque ? de la requête à une valeur
+            //1er paramètre : position du ? dans la requête
+            //2nd paramètre : valeur à insérer dans la requête
+            //3eme paramètre : format du paramètre (classiquement : STRING ou INT)
+            $req->bindParam(1,$nickname,PDO::PARAM_STR);
+            $req->bindParam(2,$email,PDO::PARAM_STR);
+            $req->bindParam(3,$password,PDO::PARAM_STR);
 
-                            //Etape 6.3 : Envoyer la requête
-                            $req->execute();
+            //Etape 6.3 : Envoyer la requête
+            $req->execute();
 
-                            //Etape 6.4 : Récupérer la réponse
-                            $data = $req->fetchAll();
+            //Etape 6.4 : Récupérer la réponse
+            $data = $req->fetchAll();
 
-                            //Etape 6.5 : Message de confirmation
-                            $message = "$nickname a été enregistré avec succès !";
+            //Etape 6.5 : Message de confirmation
+            $message = "$nickname a été enregistré avec succès !";
 
-                            return ['data' => $data, 'message' => $message];
+            return ['data' => $data, 'message' => $message];
 
-                        }catch(EXCEPTION $error){
-                            die($error->getMessage());
-                        }
+        }catch(Exception $error) {
+             // 1. On fabrique message avec la date, l'heure et l'endroit du bug
+            $date = date('Y-m-d H:i:s');
+            $logMessage = "[{$date}] Erreur SQL dans UserModel->createUser() : " . $error->getMessage() . PHP_EOL;
+
+            // 2. On écrit dans le fichier log caché sur le serveur
+            // __DIR__ représente le dossier actuel (Model). Le /../ permet de remonter d'un cran pour aller dans logs/
+            error_log($logMessage, 3, __DIR__ . '/../logs/errors.log');
+
+            // 3. On retourne un tableau vide au lieu de faire crasher la page
+            return [];
+        }
     }
 
     public function updateUser():string{
@@ -155,8 +178,17 @@ class Users {
             //Retourner un message de confirmation
             return "Mise à jour effectué avec succès";
 
-        }catch(EXCEPTION $error){
-            die($error->getMessage());
+        }catch(Exception $error) {
+             // 1. On fabrique message avec la date, l'heure et l'endroit du bug
+            $date = date('Y-m-d H:i:s');
+            $logMessage = "[{$date}] Erreur SQL dans UserModel->updateUser() : " . $error->getMessage() . PHP_EOL;
+
+            // 2. On écrit dans le fichier log caché sur le serveur
+            // __DIR__ représente le dossier actuel (Model). Le /../ permet de remonter d'un cran pour aller dans logs/
+            error_log($logMessage, 3, __DIR__ . '/../logs/errors.log');
+
+            // 3. On retourne un tableau vide au lieu de faire crasher la page
+            return "";
         }
     }
     

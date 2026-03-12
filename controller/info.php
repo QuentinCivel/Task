@@ -1,30 +1,26 @@
 <?php
-//Démarer la Session
-// session_start();
+
 
 //IMPORT DE RESSOURCE
-// include './Model/UsersModel.php';
-// include './utils/functions.php';
-// include './View/header.php';
 include './View/view_compte.php';
-// include './View/footer.php';
 
 class InfoController{
     //ATTRIBUTS
     private string $title = 'Mon Compte Utilisateur';
-    private string $style = './src/style/style-info.css';
+    private string $style = './src/style/style.css';
     private string $message = '';
     private Users $model;
     private Header $header;
     private Footer $footer;
     private InfoView $info;
+    private ?PDO $bdd;
 
     //Constructeur
-    public function __construct(){
-        $this->model = new Users(new PDO('mysql:host=localhost;dbname=task','root','root',array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION)));
+    public function __construct(?PDO $bdd){
         $this->header = new Header();
         $this->footer = new Footer();
         $this->info = new InfoView();
+        $this->bdd = $bdd;
     }
 
     //GETTER ET SETTER
@@ -48,6 +44,9 @@ class InfoController{
 
     public function getInfo(): InfoView { return $this->info; }
     public function setInfo(InfoView $info): self { $this->info = $info; return $this; }
+
+    public function getBdd(): ?PDO {return $this->bdd;}
+    public function setBdd(?PDO $bdd):self {$this->bdd = $bdd; return $this;}
 
     //METHODS
     public function isConnected():void{
@@ -95,7 +94,7 @@ class InfoController{
     }
 }
 
-$info = new InfoController();
+$info = new InfoController($bdd);
 $info->displayInfo();
 
 

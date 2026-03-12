@@ -1,32 +1,26 @@
 <?php
-//Démarrer la session
-// session_start();
 
-//IMPORT DE RESSOURCE
-// include './utils/functions.php';
-// include './Model/UsersModel.php';
-// include './View/header.php';
 include './View/view_accueil.php';
-// include './View/footer.php';
 
 class AccueilController{
     //ATTRIBUTS
     private string $title = 'accueil TODO LIST';
-    private string $style='./src/style/style-accueil.css';
+    private string $style='./src/style/style.css';
     private string $message = '';
     private string $messageCo = '';
     private Users $model;
     private Header $header;
     private AccueilView $accueil;
     private Footer $footer;
+    private ?PDO $bdd;
 
     //CONSTRUCTEUR
-    public function __construct(){
-        $this->model = new Users(new PDO('mysql:host=localhost;dbname=task','root','root',array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION)));
-
+    public function __construct(?PDO $bdd){
         $this->header = new Header();
         $this->accueil = new AccueilView();
         $this->footer = new Footer();
+        $this->bdd = $bdd;
+        $this->model = new Users($this->bdd);
     }
 
     //GETTER ET SETTER
@@ -53,6 +47,9 @@ class AccueilController{
 
     public function getFooter(): Footer { return $this->footer; }
     public function setFooter(Footer $footer): self { $this->footer = $footer; return $this; }
+
+    public function getBdd(): ?PDO {return $this->bdd;}
+    public function setBdd(?PDO $bdd):self {$this->bdd = $bdd; return $this;}
 
     //METHODS
     //méthode pour l'inscription
@@ -124,8 +121,6 @@ class AccueilController{
                 $user->setNickname($nickname);
                 $data = $user->readUserByNickname();
 
-                echo "Print_r(\$data) pour savoir ce qu'il y a dedans </br>";
-                print_r($data);
 
                 if(!empty($data)){
                     //$data non vide, donc je reçois le compte de l'utilisateur
@@ -165,11 +160,11 @@ class AccueilController{
         //Lancement de l'affichage de l'accueil
         echo $this->getAccueil()->setMessage($this->getMessage())->setMessageCo($this->getMessageCo())->renderAccueil();
         //Lancement de l'affichage du footer
-        echo $this->getFooter()->setContent("<p>Bienvenue sur l'Accueil de Ma Todo</p>")->renderFooter();
+        echo $this->getFooter()->setContent("Bienvenue sur l'Accueil de Ma Todo")->renderFooter();
     }
 }
 
-$accueil = new AccueilController();
+$accueil = new AccueilController($bdd);
 $accueil->displayAccueil();
 
 ?>

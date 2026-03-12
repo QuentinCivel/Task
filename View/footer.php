@@ -19,7 +19,7 @@ class Footer{
     public function renderFooter(){
         return "</main>
                 <footer>
-                    ".$this->getContent();
+                    ".htmlspecialchars($this->getContent());
                     "
                 </footer>
             </body>

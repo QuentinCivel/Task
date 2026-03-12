@@ -1,0 +1,5 @@
+# Ignorer les variables d'environnement (Mots de passe)
+.env
+
+# Ignorer les logs (pour ne pas envoyer les erreurs sur internet)
+logs/errors.log
