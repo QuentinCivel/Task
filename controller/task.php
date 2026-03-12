@@ -80,7 +80,7 @@ if(isset($_POST['updateTask'])) {
         }
 
         // 2) Appel du modèle pour la mise à jour
-        if($taskModel->updateTask($id_to_update, $name, $content, $date, $tabCategory)) {
+        if($taskModel->updateTask($id_to_update,$_SESSION['id'], $name, $content, $date, $tabCategory)) {
             $message = "<span style='color:green;'>La tâche a bien été modifiée !</span>";
         } else {
             $message = "<span style='color:red;'>Erreur lors de la modification.</span>";
@@ -93,7 +93,7 @@ if(isset($_POST['updateTask'])) {
 if(isset($_POST['submit_delete_task']) && !empty($_POST['id_task_to_delete'])){
     $id_to_delete = (int)$_POST['id_task_to_delete'];
     
-    if($taskModel->deleteTask($id_to_delete)){
+    if($taskModel->deleteTask($id_to_delete,$_SESSION['id'])){
         $message = "<span style='color:green;'>La tâche a bien été supprimée !</span>";
     } else {
         $message = "<span style='color:red;'>Erreur lors de la suppression de la tâche.</span>";
@@ -113,7 +113,7 @@ if(isset($_GET['edit_id']) && !empty($_GET['edit_id'])) {
     $id_to_edit = (int)$_GET['edit_id'];
     
     // On va chercher les infos de la tâche dans la BDD
-    $taskToEdit = $taskModel->getTaskById($id_to_edit);
+    $taskToEdit = $taskModel->getTaskById($id_to_edit,$_SESSION['id']);
     
     // Si la tâche existe bien, on prépare les variables pour la vue
     if(!empty($taskToEdit)) {
@@ -158,12 +158,11 @@ foreach($data as $task){
 
 
 //Affichage de la vue
-// include './View/header.php';
+
 $header = new Header();
 echo $header->setTitle($title)->setStyle($style)->renderHeader();
 
-// include './View/view_task.php';
+include './View/view_task.php';
 
-// include './View/footer.php';
 $footer = new Footer();
 echo $footer->renderFooter();

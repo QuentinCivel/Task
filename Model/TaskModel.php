@@ -108,10 +108,12 @@ public function readTasksByUser(int $id):array{
     }
 }
 
-public function deleteTask(int $id_task):bool{
-    try{
-        $req=$this->bdd->prepare('DELETE FROM task  WHERE id_task = ?');
-        $req->bindParam(1,$id_task,PDO::PARAM_INT);
+public function deleteTask(int $id_task, int $id_user): bool { // Ajout de $id_user
+    try {
+        // Ajout du contrôle AND id_user = ?
+        $req = $this->bdd->prepare('DELETE FROM task WHERE id_task = ? AND id_user = ?');
+        $req->bindParam(1, $id_task, PDO::PARAM_INT);
+        $req->bindParam(2, $id_user, PDO::PARAM_INT);
         $req->execute();
         return true;
 
@@ -130,11 +132,12 @@ public function deleteTask(int $id_task):bool{
 }
 
 // 1. Récupérer les infos d'une seule tâche (pour pré-remplir le formulaire)
-    public function getTaskById(int $id_task): array {
-        try {
-            $req = $this->bdd->prepare('SELECT t.id_task, t.name_task, t.content_task, t.date_task, t.id_user FROM task t WHERE t.id_task = ?');
-            $req->bindParam(1, $id_task, PDO::PARAM_INT);
-            $req->execute();
+public function getTaskById(int $id_task, int $id_user): array {
+    try {
+        $req = $this->bdd->prepare('SELECT t.id_task, t.name_task, t.content_task, t.date_task, t.id_user FROM task t WHERE t.id_task = ? AND t.id_user = ?');
+        $req->bindParam(1, $id_task, PDO::PARAM_INT);
+        $req->bindParam(2, $id_user, PDO::PARAM_INT);
+        $req->execute();
             
             $data = $req->fetch(PDO::FETCH_ASSOC);
             
@@ -150,15 +153,16 @@ public function deleteTask(int $id_task):bool{
     }
 
     // 2. Mettre à jour la tâche 
-    public function updateTask(int $id_task, string $name, string $content, string $date, array $tabCategory): bool {
-        try {
-            // A. Mise à jour de la table TASK
-            $req = $this->bdd->prepare('UPDATE task SET name_task = ?, content_task = ?, date_task = ? WHERE id_task = ?');
-            $req->bindParam(1, $name, PDO::PARAM_STR);
-            $req->bindParam(2, $content, PDO::PARAM_STR);
-            $req->bindParam(3, $date, PDO::PARAM_STR);
-            $req->bindParam(4, $id_task, PDO::PARAM_INT);
-            $req->execute();
+public function updateTask(int $id_task, int $id_user, string $name, string $content, string $date, array $tabCategory): bool {
+    try {
+        // Ajout du AND id_user = ?
+        $req = $this->bdd->prepare('UPDATE task SET name_task = ?, content_task = ?, date_task = ? WHERE id_task = ? AND id_user = ?');
+        $req->bindParam(1, $name, PDO::PARAM_STR);
+        $req->bindParam(2, $content, PDO::PARAM_STR);
+        $req->bindParam(3, $date, PDO::PARAM_STR);
+        $req->bindParam(4, $id_task, PDO::PARAM_INT);
+        $req->bindParam(5, $id_user, PDO::PARAM_INT);
+        $req->execute();
 
             // B. Mise à jour des catégories (On supprime les anciennes et on insère les nouvelles)
             $reqDel = $this->bdd->prepare('DELETE FROM task_category WHERE id_task = ?');

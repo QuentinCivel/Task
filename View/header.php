@@ -29,42 +29,43 @@ class Header {
     //METHODE
     public function renderHeader():string{
         $link = '';
-        $linkSession= '';
+        $linkSession = '';
         $span = '';
 
-        switch($this->getTitle()){
-            case 'Mon Compte Utilisateur' :
-            case 'Mes ToDoes' :
-                $link = "<li><a href='/Projet_task/'>Accueil TODO LIST</a></li>";
-                break;
-            case 'accueil TODO LIST' :
-                $link = "<li><a href='/Projet_task/Info'>Vos Infos</a></li>";
-                break;
+        // 1. Si on n'est pas sur l'accueil, on met toujours un lien pour y retourner
+        if ($this->getTitle() !== 'accueil TODO LIST') {
+            $link = "<li><a href='/'>Accueil TODO LIST</a></li>";
         }
 
-        if(isset($_SESSION['nickname'])){
-            $linkSession= "<li><a href='/Projet_task/Mes_taches'>My ToDoes</a></li>
-                        <li><a href='/Projet_task/Se_deconnecter'>Se Deconnecter</a></li>";
-        }
+        // 2. Liens et infos affichés UNIQUEMENT si l'utilisateur est connecté
+        if (isset($_SESSION['nickname'])) {
+            
+            // Si on est sur l'accueil ET connecté, on propose le lien "Vos Infos"
+            if ($this->getTitle() === 'accueil TODO LIST') {
+                $linkSession .= "<li><a href='/Info'>Vos Infos</a></li>";
+            }
 
-        if(isset($_SESSION['nickname'])){
-                    $span = "<span>Vous êtes : {$_SESSION['nickname']}</span>";
+            // On ajoute les liens de base d'un utilisateur connecté
+            $linkSession .= "<li><a href='/Mes_taches'>My ToDoes</a></li>
+                             <li><a href='/Se_deconnecter'>Se Deconnecter</a></li>";
+            
+            // On affiche le petit badge avec son nom
+            $span = "<span>Vous êtes : " . htmlspecialchars($_SESSION['nickname']) . "</span>";
         }
 
         return "<!DOCTYPE html>
-                <html lang='en'>
+                <html lang='fr'>
                 <head>
-                    
                     <meta charset='UTF-8'>
                     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
                     <title>".htmlspecialchars($this->getTitle())."</title>
-                    <link rel='stylesheet' href='".$this->getStyle()."'>
+                    <link rel='stylesheet' href='/src/style/style.css'>
                 </head>
                 <body>
                     <header>
                         <nav>
                             <ul>
-                                <li><a href='/Projet_task/'>Accueil General</a></li>".$link.$linkSession."
+                                <li><a href='/'>Accueil General</a></li>".$link.$linkSession."
                             </ul>
                         </nav>".$span."
                     </header>

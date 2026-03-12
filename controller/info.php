@@ -52,7 +52,7 @@ class InfoController{
     public function isConnected():void{
         //VERIFIER SI LA PERSONNE EST CONNECTE, SINON ON REDIRIGE VERS ACCUEIL
         if(!isset($_SESSION['id'])){
-            header('Location:/Projet_task');
+            header('Location:/');
         }
     }
 
