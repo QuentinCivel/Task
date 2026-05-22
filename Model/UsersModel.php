@@ -135,13 +135,14 @@ class Users {
             $req->execute();
 
             //Etape 6.4 : Récupérer la réponse
-            $data = $req->fetchAll();
+            // $data = $req->fetchAll();
 
             //Etape 6.5 : Message de confirmation
             $message = "$nickname a été enregistré avec succès !";
 
-            return ['data' => $data, 'message' => $message];
+            // return ['data' => $data, 'message' => $message];
 
+            return ['message' => $message];
         }catch(Exception $error) {
              // 1. On fabrique message avec la date, l'heure et l'endroit du bug
             $date = date('Y-m-d H:i:s');

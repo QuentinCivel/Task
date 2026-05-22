@@ -85,10 +85,18 @@ class AccueilController{
                             //$data vide -> signifie que nickname et email sont dispo
                             // Lance le try... catch d'inscription
                             // Try... Catch : nous permet de gérer les erreurs de communication avec la BDD et de requête envoyée à la BDD
-                            $data = $user->createUser();
+                            // $data = $user->createUser();
+                            $result = $user->createUser();
+                            // On vérifie que le tableau n'est pas vide et que la clé 'message' existe
+                            if (!empty($result) && isset($result['message'])) {
+                                $this->setMessage($result['message']);
+                            } else {
+                            // Message de secours si on est tombé dans le catch
+                                $this->setMessage("Une erreur est survenue lors de l'inscription.");
+                            }
 
                             //Affichage du message de confirmation
-                            $this->setMessage($data['message']);
+                            // $this->setMessage($data['message']);
                         }else{
                             //$data non vide -> signifie que nickname OU email indispo
                             //message d'erreur
