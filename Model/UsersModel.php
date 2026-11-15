@@ -84,7 +84,7 @@ class Users {
     public function readUserByNicknameAndEmail():array{
         try{
             //Prepare
-            $req = $this->getBDD()->prepare('SELECT u.id_user, u.nickname_user, u.email_user, u.firstname_user, u.lastname_user, u.password_user.id_role, r.`role` FROM users u INNER JOIN `role` r ON u.id_role = r.id_role WHERE u.nickname_user = ? OR u.email_user = ?');
+            $req = $this->getBDD()->prepare('SELECT u.id_user, u.nickname_user, u.email_user, u.firstname_user, u.lastname_user, u.password_user, r.id_role, r.`role` FROM users u INNER JOIN `role` r ON u.id_role = r.id_role WHERE u.nickname_user = ? OR u.email_user = ?');
 
             $nickname = $this->getNickname();
             $email = $this->getEmail();
