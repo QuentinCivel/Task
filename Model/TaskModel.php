@@ -152,7 +152,22 @@ public function getTaskById(int $id_task, int $id_user): array {
         }
     }
 
-    // 2. Mettre à jour la tâche 
+    // Récupérer les ids des catégories associées à une tâche (pour pré-cocher le formulaire d'édition)
+public function getCategoryIdsByTask(int $id_task): array {
+    try {
+        $req = $this->bdd->prepare('SELECT id_category FROM task_category WHERE id_task = ?');
+        $req->bindParam(1, $id_task, PDO::PARAM_INT);
+        $req->execute();
+        return $req->fetchAll(PDO::FETCH_COLUMN);
+    } catch(Exception $error) {
+        $date = date('Y-m-d H:i:s');
+        $logMessage = "[{$date}] Erreur SQL dans TaskModel->getCategoryIdsByTask() : " . $error->getMessage() . PHP_EOL;
+        error_log($logMessage, 3, __DIR__ . '/../logs/errors.log');
+        return [];
+    }
+}
+
+    // 2. Mettre à jour la tâche
 public function updateTask(int $id_task, int $id_user, string $name, string $content, string $date, array $tabCategory): bool {
     try {
         // Ajout du AND id_user = ?

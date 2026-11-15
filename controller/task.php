@@ -7,6 +7,12 @@ $message = "";
 $checkboxCategories = '';
 $todoList = '';
 
+//Sécurité : accès réservé aux utilisateurs connectés
+if(!isset($_SESSION['id'])){
+    header('Location:/');
+    exit;
+}
+
 //Traitement de l'affichage des Categories dans le formulaire
 
 
@@ -16,16 +22,14 @@ $categoryModel = new Category($bdd);
 $taskModel = new Task($bdd);
 $data = $categoryModel->readCategories();
 
-// Créer la liste des checkbox pour le formulaire
-foreach($data as $category){
-    $checkboxCategories = $checkboxCategories."<input id='{$category['category']}' type='checkbox' name='category[]' value='{$category['id_category']}'><label for='{$category['category']}'> {$category['category']} </label>";
-}
-
 //Le Traitement le formulaire d'Ajout d'une Task
 //1) Vérifier la réception du formulaire
 if(isset($_POST['addTask'])){
-   //2) Sécurité : Vérifier les champs vides
-    if(!empty($_POST['nameTask']) && !empty($_POST['contentTask']) && !empty($_POST['dateTask']) && !empty($_POST['category'])){
+   //2) Sécurité : Vérifier le jeton CSRF
+    if(!csrf_verify()){
+        $message = "Jeton de sécurité invalide. Merci de réessayer.";
+   //3) Sécurité : Vérifier les champs vides
+    } elseif(!empty($_POST['nameTask']) && !empty($_POST['contentTask']) && !empty($_POST['dateTask']) && !empty($_POST['category'])){
         //3) Sécurité : vérifier le format des données -> pas de format à valider (sauf utilisation de REGEX)
         //booléen à true pour gérer le format des checkbox
         $bool = true;
@@ -66,8 +70,11 @@ if(isset($_POST['addTask'])){
 }
 
 if(isset($_POST['updateTask'])) {
-    // 1) Vérifications de base (comme pour l'ajout)
-    if(!empty($_POST['nameTask']) && !empty($_POST['contentTask']) && !empty($_POST['dateTask']) && !empty($_POST['id_task_to_update']) && !empty($_POST['category'])){
+    // 1) Vérification du jeton CSRF
+    if(!csrf_verify()){
+        $message = "Jeton de sécurité invalide. Merci de réessayer.";
+    // 2) Vérifications de base (comme pour l'ajout)
+    } elseif(!empty($_POST['nameTask']) && !empty($_POST['contentTask']) && !empty($_POST['dateTask']) && !empty($_POST['id_task_to_update']) && !empty($_POST['category'])){
         
         $name = sanitize($_POST['nameTask']);
         $content = sanitize($_POST['contentTask']);
@@ -90,13 +97,17 @@ if(isset($_POST['updateTask'])) {
     }
 }
 
-if(isset($_POST['submit_delete_task']) && !empty($_POST['id_task_to_delete'])){
-    $id_to_delete = (int)$_POST['id_task_to_delete'];
-    
-    if($taskModel->deleteTask($id_to_delete,$_SESSION['id'])){
-        $message = "<span style='color:green;'>La tâche a bien été supprimée !</span>";
-    } else {
-        $message = "<span style='color:red;'>Erreur lors de la suppression de la tâche.</span>";
+if(isset($_POST['submit_delete_task'])){
+    if(!csrf_verify()){
+        $message = "Jeton de sécurité invalide. Merci de réessayer.";
+    } elseif(!empty($_POST['id_task_to_delete'])){
+        $id_to_delete = (int)$_POST['id_task_to_delete'];
+
+        if($taskModel->deleteTask($id_to_delete,$_SESSION['id'])){
+            $message = "<span style='color:green;'>La tâche a bien été supprimée !</span>";
+        } else {
+            $message = "<span style='color:red;'>Erreur lors de la suppression de la tâche.</span>";
+        }
     }
 }
 
@@ -120,7 +131,8 @@ if(isset($_GET['edit_id']) && !empty($_GET['edit_id'])) {
         $formIdTask = $taskToEdit['id_task'];
         $formName = htmlspecialchars($taskToEdit['name_task']);
         $formContent = htmlspecialchars($taskToEdit['content_task']);
-        $formDate = htmlspecialchars($taskToEdit['date_task']);
+        // On ne garde que la partie YYYY-MM-DD : un <input type="date"> rejette une valeur avec l'heure
+        $formDate = htmlspecialchars(substr($taskToEdit['date_task'], 0, 10));
         
         // On change l'action du bouton
         $btnAction = "updateTask";
@@ -128,9 +140,19 @@ if(isset($_GET['edit_id']) && !empty($_GET['edit_id'])) {
     }
 }
 
+// Catégories déjà associées à la tâche (pour pré-cocher les checkbox en mode édition)
+$editCategoryIds = $modeEdition ? $taskModel->getCategoryIdsByTask((int)$formIdTask) : [];
+
+// Créer la liste des checkbox pour le formulaire
+foreach($data as $category){
+    $checked = in_array($category['id_category'], $editCategoryIds) ? ' checked' : '';
+    $checkboxCategories = $checkboxCategories."<input id='{$category['category']}' type='checkbox' name='category[]' value='{$category['id_category']}'{$checked}><label for='{$category['category']}'> {$category['category']} </label>";
+}
+
 $data = $taskModel->readTasksByUser($_SESSION['id']);
 
 //Affichage des tâches
+$csrfToken = htmlspecialchars(csrf_token());
 foreach($data as $task){
     // On sécurise les données affichées 
     $name = htmlspecialchars($task['name_task']);
@@ -149,6 +171,7 @@ foreach($data as $task){
 
         <form method='POST' action='' style=\"display:inline-block;\">
             <input type='hidden' name='id_task_to_delete' value='{$id_task}'>
+            <input type='hidden' name='csrf_token' value='{$csrfToken}'>
             <button type='submit' name='submit_delete_task'>Supprimer</button>
         </form>
         

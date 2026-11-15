@@ -22,6 +22,7 @@ class AccueilView{
                     <section class='auth-card'>
                         <h2>Inscription Utilisateur</h2>
                         <form action='' method='post'>
+                            ".csrf_field()."
                             <label for='nickname'>Pseudo</label><input type='text' id='nickname' name='nickname'>
                             <label for='email'>Email</label><input type='email' id='email' name='email'>
                             <label for='password'>Mot de Passe</label><input type='password' id='password' name='password'>
@@ -34,6 +35,7 @@ class AccueilView{
                     <section class='auth-card'>
                         <h2>Connexion Utilisateur</h2>
                         <form action='' method='post'>
+                            ".csrf_field()."
                             <label for='nicknameSignUp'>Pseudo</label><input type='text' id='nicknameSignUp' name='nicknameSignUp'>
                             <label for='passwordSignUp'>Password</label><input type='password' id='passwordSignUp' name='passwordSignUp'>
                             <input type='submit' name='signUp' value='Se Connecter'>

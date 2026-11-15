@@ -4,6 +4,7 @@
     <h2><?php echo $modeEdition ? "Modifier la ToDo" : "Ajouter une ToDo"; ?></h2>
     
     <form method="post">
+        <?php echo csrf_field(); ?>
         <input type="hidden" name="id_task_to_update" value="<?php echo $formIdTask; ?>">
         
         <label for="nameTask">Titre : </label>

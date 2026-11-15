@@ -55,6 +55,12 @@ class AccueilController{
     //méthode pour l'inscription
     public function signUp(){
         if(isset($_POST['signIn'])){
+            //Etape de Sécurité 0 : vérifier le jeton CSRF
+            if(!csrf_verify()){
+                $this->setMessage("Jeton de sécurité invalide. Merci de réessayer.");
+                return;
+            }
+
             //Etape de Sécurité 1 : vérifier les champs vides
             if(!empty($_POST['nickname']) && !empty($_POST['email']) && !empty($_POST['password']) && !empty($_POST['passwordVerify']) ){
 
@@ -117,6 +123,12 @@ class AccueilController{
     //méthode pour la connexion
     public function signIn(){
         if(isset($_POST['signUp'])){
+            //Etape de Sécurité 0 : vérifier le jeton CSRF
+            if(!csrf_verify()){
+                $this->setMessageCo("Jeton de sécurité invalide. Merci de réessayer.");
+                return;
+            }
+
             //Etape de Sécurité 1 : Vérifier les champs vides
             if(!empty($_POST['nicknameSignUp']) && !empty($_POST['passwordSignUp'])){
                 //Etape de Sécurité 2 : Vérifier le Format -> aucun format à vérifier ici sauf utilisé une Regex
@@ -134,6 +146,9 @@ class AccueilController{
                     //$data non vide, donc je reçois le compte de l'utilisateur
                     //Vérifier la correspondancedes mots de psse : password_verify()
                     if(password_verify($password, $data['password_user'])){
+                        //Protection contre la fixation de session : on régénère l'ID après authentification
+                        session_regenerate_id(true);
+
                         //Je connecte l'utilisateur en remplissant la superglobal $_SESSION
                         $_SESSION = [
                                 'id' => $data['id_user'],

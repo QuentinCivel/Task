@@ -28,6 +28,7 @@ class InfoView{
 
             <h2>Mise à jour Utilisateur</h2>
             <form action="" method="post">
+                '.csrf_field().'
                 <label for="pseudo">Pseudo :</label>
                 <input id="pseudo" type="text" name="pseudo" value="'.htmlspecialchars($_SESSION['nickname']).'">
                 

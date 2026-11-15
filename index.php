@@ -1,5 +1,13 @@
 <?php
 
+// Avec le serveur PHP intégré (php -S), on laisse les fichiers statiques
+// existants (CSS, images...) être servis tels quels au lieu de passer par le routeur.
+if (php_sapi_name() === 'cli-server') {
+    $staticFile = __DIR__ . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    if (is_file($staticFile)) {
+        return false;
+    }
+}
 
 session_start();
 

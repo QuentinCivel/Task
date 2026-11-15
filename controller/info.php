@@ -54,14 +54,20 @@ class InfoController{
         //VERIFIER SI LA PERSONNE EST CONNECTE, SINON ON REDIRIGE VERS ACCUEIL
         if(!isset($_SESSION['id'])){
             header('Location:/');
+            exit;
         }
     }
 
     public function updateUser():void{
         //TRAITEMENT DU FORMULAIRE DE MISE A JOUR
         if(isset($_POST['update'])){
-            
-            
+
+            //Vérification du jeton CSRF
+            if(!csrf_verify()){
+                $this->setMessage("Jeton de sécurité invalide. Merci de réessayer.");
+                return;
+            }
+
             $newNickname = $_SESSION['nickname'];
             $newEmail = $_SESSION['email'];
             $hasChanged = false;
