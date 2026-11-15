@@ -28,11 +28,11 @@ class InfoView{
 
             <h2>Mise à jour Utilisateur</h2>
             <form action="" method="post">
-                <label for="firstname">Prenom :</label>
-                <input id="firstname" type="text" name="firstname">
+                <label for="pseudo">Pseudo :</label>
+                <input id="pseudo" type="text" name="pseudo" value="'.htmlspecialchars($_SESSION['nickname']).'">
                 
-                <label for="lastname">Nom :</label>
-                <input id="lastname" type="text" name="lastname">
+                <label for="email">Email :</label>
+                <input id="email" type="text" name="email" value="'.htmlspecialchars($_SESSION['email']).'">
                 
                 <input type="submit" name="update" value="Mettre à Jour">
             </form>

@@ -160,38 +160,37 @@ class Users {
     public function updateUser():string{
         //Try Catch pour requête de Mise à jour
         try{
-            //Requête préparée
-            $req = $this->getBDD()->prepare('UPDATE users SET firstname_user = ?, lastname_user = ? WHERE id_user = ?');
+            // Requête préparée ciblée sur le pseudo et l'email
+            $req = $this->getBDD()->prepare('UPDATE users SET nickname_user = ?, email_user = ? WHERE id_user = ?');
 
-            //Je récupère depuis l'objet les données à mettre à jour 
-            $firstname = $this->getFirstname();
-            $lastname = $this->getLastname();
+            // Je récupère depuis l'objet les bonnes données à mettre à jour 
+            $nickname = $this->getNickname();
+            $email = $this->getEmail();
             $id = $this->getIdUser();
 
-            //Binding de Paramètre
-            $req->bindParam(1,$firstname,PDO::PARAM_STR);
-            $req->bindParam(2,$lastname,PDO::PARAM_STR);
+            // Binding de Paramètre
+            $req->bindParam(1,$nickname,PDO::PARAM_STR);
+            $req->bindParam(2,$email,PDO::PARAM_STR);
             $req->bindParam(3,$id,PDO::PARAM_INT);
 
-            //Execution de la requête
+            // Execution de la requête
             $req->execute();
 
-            //Retourner un message de confirmation
-            return "Mise à jour effectué avec succès";
+            // Retourner un message de confirmation
+            return "Mise à jour effectuée avec succès.";
 
         }catch(Exception $error) {
-             // 1. On fabrique message avec la date, l'heure et l'endroit du bug
+             // On fabrique le message avec la date, l'heure et l'endroit du bug
             $date = date('Y-m-d H:i:s');
             $logMessage = "[{$date}] Erreur SQL dans UserModel->updateUser() : " . $error->getMessage() . PHP_EOL;
 
-            // 2. On écrit dans le fichier log caché sur le serveur
-            // __DIR__ représente le dossier actuel (Model). Le /../ permet de remonter d'un cran pour aller dans logs/
+            // On écrit dans le fichier log caché sur le serveur
             error_log($logMessage, 3, __DIR__ . '/../logs/errors.log');
 
-            // 3. On retourne un tableau vide au lieu de faire crasher la page
-            return "";
+            // On retourne un message d'erreur clair pour l'utilisateur au lieu d'une chaîne vide
+            return "Une erreur est survenue lors de la mise à jour.";
         }
-    }
+    } 
     
 }
 

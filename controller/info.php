@@ -21,6 +21,7 @@ class InfoController{
         $this->footer = new Footer();
         $this->info = new InfoView();
         $this->bdd = $bdd;
+        $this->model = new Users($this->bdd);
     }
 
     //GETTER ET SETTER
@@ -59,24 +60,52 @@ class InfoController{
     public function updateUser():void{
         //TRAITEMENT DU FORMULAIRE DE MISE A JOUR
         if(isset($_POST['update'])){
-            $firstname = '';
-            $lastname = '';
+            
+            
+            $newNickname = $_SESSION['nickname'];
+            $newEmail = $_SESSION['email'];
+            $hasChanged = false;
 
-            if(!empty($_POST['firstname'])){
-                $firstname = sanitize($_POST['firstname']);
+            // Vérification du Pseudo
+            if(!empty($_POST['pseudo']) && $_POST['pseudo'] !== $_SESSION['nickname']){
+                $newNickname = sanitize($_POST['pseudo']);
+                $hasChanged = true;
             }
-            if(!empty($_POST['lastname'])){
-                $lastname = sanitize($_POST['lastname']);
+
+            // Vérification de l'Email
+            if(!empty($_POST['email']) && $_POST['email'] !== $_SESSION['email']){
+                if(filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)){
+                    $newEmail = sanitize($_POST['email']);
+                    $hasChanged = true;
+                } else {
+                    $this->setMessage("Le format de l'adresse email est invalide.");
+                    return; 
+                }
             }
 
-            //Récupérer l'objet model user
-            $user = $this->getModel();
+            // Mise à jour si un changement a été détecté
+            if($hasChanged){
+                $user = $this->getModel();
+                
+                // On met à jour l'objet avec les nouvelles données et l'ID de session
+                $user->setNickname($newNickname)
+                    ->setEmail($newEmail)
+                    ->setIdUser($_SESSION['id']);
 
-            //Je remplis mon objet avec les données dont j'ai besoin
-            $user->setFirstname($firstname)->setLastname($lastname)->setIdUser($_SESSION['id']);
+                // On lance la requête en BDD 
+                $resultMessage = $user->updateUser();
+                
+                // On met à jour l'affichage des messages
+                $this->setMessage($resultMessage);
 
-            //J'utilise la méthode de l'objet updateUser() pour qu'il mette à jour les données de mon utilisateur en BDD
-            $this->setMessage($user->updateUser());
+                // Si la modification en base de données a réussi, on met à jour la session
+                
+                $_SESSION['nickname'] = $newNickname;
+                $_SESSION['email'] = $newEmail;
+
+            } else {
+                $this->setMessage("Aucune modification n'a été apportée.");
+            }
         }
     }
 
